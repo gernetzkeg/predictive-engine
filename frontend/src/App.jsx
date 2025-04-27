@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Upload from './components/Upload';
 import DataTable from './components/DataTable';
 import ModelControls from './components/ModelControls';
+import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 
 function App() {
@@ -11,9 +12,8 @@ function App() {
     setCsvData(data);
   };
 
-  const handleRunModel = () => {
-    // Placeholder for model execution
-    console.log('Running model with data:', csvData);
+  const handleRunModel = (predictions) => {
+    setCsvData(predictions);
   };
 
   return (
@@ -21,8 +21,10 @@ function App() {
       <h1 className="text-2xl font-bold mb-4">Finance Web App</h1>
       <p className="mb-4">Upload a CSV to get started.</p>
       <Upload onDataParsed={handleDataParsed} />
-      <DataTable data={csvData} />
-      <ModelControls onRunModel={handleRunModel} />
+      <ErrorBoundary>
+        <DataTable data={csvData} />
+      </ErrorBoundary>
+      <ModelControls onRunModel={handleRunModel} data={csvData} />
     </div>
   );
 }

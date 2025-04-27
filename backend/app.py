@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
-import os
+from data_prep import train_predict
 
 app = Flask(__name__)
-CORS(app)  # Allow frontend requests from http://localhost:5173
+CORS(app)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -15,14 +15,24 @@ def upload_file():
         return jsonify({'error': 'No file selected'}), 400
     if file and file.filename.endswith('.csv'):
         try:
-            # Read CSV into pandas DataFrame
             df = pd.read_csv(file)
-            # Convert to list of dictionaries
             data = df.to_dict(orient='records')
             return jsonify({'data': data}), 200
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     return jsonify({'error': 'Invalid file format, CSV required'}), 400
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        df = pd.DataFrame(data)
+        result = train_predict(df)
+        return jsonify({'predictions': result}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
