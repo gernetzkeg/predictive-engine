@@ -1,23 +1,28 @@
 import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import Papa from 'papaparse';
 
 function Upload({ onDataParsed }) {
   const onDrop = useCallback(
-    (acceptedFiles) => {
+    async (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (file) {
-        Papa.parse(file, {
-          complete: (result) => {
-            console.log('Parsed CSV:', result.data);
-            onDataParsed(result.data); // Pass parsed data to parent
-          },
-          header: true, // Treat first row as headers
-          skipEmptyLines: true,
-          error: (error) => {
-            console.error('CSV parse error:', error);
-          },
-        });
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+          const response = await fetch('http://127.0.0.1:5000/upload', {
+            method: 'POST',
+            body: formData,
+          });
+          const result = await response.json();
+          if (response.ok) {
+            console.log('Backend response:', result.data);
+            onDataParsed(result.data);
+          } else {
+            console.error('Upload error:', result.error);
+          }
+        } catch (error) {
+          console.error('Network error:', error);
+        }
       }
     },
     [onDataParsed]
