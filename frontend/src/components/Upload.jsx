@@ -15,8 +15,8 @@ function Upload({ onDataParsed }) {
           });
           const result = await response.json();
           if (response.ok) {
-            console.log('Backend response:', result.data);
-            onDataParsed(result.data);
+            console.log('Backend response:', result);
+            onDataParsed(result.data, result.numeric_columns || []);
           } else {
             console.error('Upload error:', result.error);
           }
